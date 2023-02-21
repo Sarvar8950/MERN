@@ -1,0 +1,31 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.notify {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    min-height: 50px;
+    min-width: 200px;
+    max-width: 400px;
+    z-index: 1111;
+    color: #fff;
+    padding: 6px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-radius: 4px;
+}
+.notify .notifybox{
+    position: relative;
+    height: 100%;
+    width: 100%;
+}
+.notify .notifybox p{
+    position: relative;
+    font-size: 14px;
+    margin-bottom: 0;
+}
