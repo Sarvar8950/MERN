@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { Notify } from '../Notify.service'
+// import { Notify } from '../Notify.service'
 
 export default function Signup() {
 
@@ -27,19 +27,22 @@ export default function Signup() {
             console.log("All fields are required")
             // Info("Please fill mandetory fields")
             return (
-                <Notify type='Info' msg={"Please fill mandetory fields"} bgcolor={"yellow"} />
+                <></>
+                // <Notify type='Info' msg={"Please fill mandetory fields"} bgcolor={"yellow"} />
             )
         } else if (registerform.password.length < 6) {
             console.log("Password should not be less than 6 character")
             // Info("Password should not be less than 6 character")
             return (
-                <Notify type='Info' msg={"Password should not be less than 6 character"} bgcolor={"yellow"} />
+                <></>
+                // <Notify type='Info' msg={"Password should not be less than 6 character"} bgcolor={"yellow"} />
             )
         } else if (registerform.password !== registerform.confirmpassword) {
             console.log("Confirm Password do not match to Password")
             // Error("Confirm Password do not match to Password")
             return (
-                <Notify type='Error' msg={"Confirm Password do not match to Password"} bgcolor={"red"} />
+                <></>
+                // <Notify type='Error' msg={"Confirm Password do not match to Password"} bgcolor={"red"} />
             )
         }
         fetch('http://localhost:8000/register', {
@@ -52,7 +55,8 @@ export default function Signup() {
             .then((res) => res.json())
             .then((res) => {
                 return (
-                    <Notify type='Success' msg={"User Registered Successfully"} bgcolor={"green"} />
+                    <></>
+                    // <Notify type='Success' msg={"User Registered Successfully"} bgcolor={"green"} />
                 )
                 console.log(res)
             }).catch((err) => {
