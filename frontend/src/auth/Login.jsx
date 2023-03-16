@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { createToast } from "../Notify.module"
 
-export default function Login() {
+export default function Login({setIsLogedIn}) {
     const [loginForm, setLoginForm] = useState({
         email: "",
         password: ""
@@ -36,6 +36,7 @@ export default function Login() {
             .then(res => {
                 console.log(res)
                 res.data['token'] = res.token
+                setIsLogedIn(res.data)
                 sessionStorage.setItem("userDetails", JSON.stringify(res.data))
             }).catch(error => console.log(error))
     }

@@ -5,16 +5,20 @@ import Authhome from './auth/Authhome';
 import ForgetPassword from './auth/ForgetPassword';
 import Login from './auth/Login';
 import Signup from './auth/Signup';
+import Header from './Component/Header';
 import { useEffect, useState } from 'react';
+import Home from './Component/Home';
+import About from './Component/About';
+import Form from './Component/Form/Form';
 
 function App() {
-  const [ isLogedin, setIsLogedIn ] = useState()
-  const [ verifyUser, setverifyUser ] = useState(false)
+  const [isLogedin, setIsLogedIn] = useState(false)
+  const [verifyUser, setverifyUser] = useState(false)
   useEffect(() => {
     const logedInDetails = JSON.parse(sessionStorage.getItem('userDetails'))
     console.log(logedInDetails)
     setIsLogedIn(logedInDetails)
-    if (isLogedin) {
+    if (logedInDetails) {
       fetch(`http://localhost:8000/validateToken`, {
         method: "POST",
         body: JSON.stringify({
@@ -40,12 +44,26 @@ function App() {
   return (
     <>
       <ul className="notifications" style={{ position: 'absolute', left: 0, top: 0, zIndex: -1 }}></ul>
-      <Authhome />
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgetpassword" element={<ForgetPassword />} />
-      </Routes>
+      {
+        !isLogedin ?
+          <>
+            <Authhome />
+            <Routes>
+              <Route path="/" element={<Login setIsLogedIn={setIsLogedIn} />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgetpassword" element={<ForgetPassword />} />
+            </Routes>
+          </>
+          :
+          <>
+            <Header setIsLogedIn={setIsLogedIn} />
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/addItem" element={<Form />} />
+            </Routes>
+          </>
+      }
     </>
   );
 }
