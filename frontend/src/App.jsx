@@ -10,36 +10,15 @@ import { useEffect, useState } from 'react';
 import Home from './Component/Home';
 import About from './Component/About';
 import Form from './Component/Form/Form';
+import ListItem from './Component/Form/ListItem';
 
 function App() {
   const [isLogedin, setIsLogedIn] = useState(false)
-  const [verifyUser, setverifyUser] = useState(false)
   useEffect(() => {
     const logedInDetails = JSON.parse(sessionStorage.getItem('userDetails'))
     console.log(logedInDetails)
     setIsLogedIn(logedInDetails)
-    if (logedInDetails) {
-      fetch(`http://localhost:8000/validateToken`, {
-        method: "POST",
-        body: JSON.stringify({
-          token: logedInDetails.token
-        }),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }).then(res => res.json())
-        .then(res => {
-          console.log(res)
-          if (res.responseStatus === "SUCCESS") {
-            setverifyUser(true)
-          } else {
-            setverifyUser(false)
-          }
-        }).catch(error => {
-          setverifyUser(false)
-          console.log(error)
-        })
-    }
+    
   }, [])
   return (
     <>
@@ -61,6 +40,7 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/about" element={<About />} />
               <Route path="/addItem" element={<Form />} />
+              <Route path="/listItem" element={<ListItem />} />
             </Routes>
           </>
       }

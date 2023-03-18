@@ -16,7 +16,8 @@ export default function Form() {
         let userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
         let payload = {
             ...form,
-            email : userDetails.email
+            email : userDetails.email,
+            time : new Date()
         }
         console.log(payload)
         fetch('http://localhost:8000/additem', {
