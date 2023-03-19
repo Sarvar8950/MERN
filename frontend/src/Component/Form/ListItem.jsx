@@ -5,7 +5,7 @@ import { useEffect } from "react";
 export default function ListItem() {
   const [page, setPage] = useState(0);
   const [totalpage, setTotalPage] = useState(0);
-  const [limit, setLimit] = useState(3);
+  const [limit, setLimit] = useState(5);
   const [allItems, setAllItems] = useState([]);
 
   useEffect(() => {
@@ -31,7 +31,7 @@ export default function ListItem() {
         console.log(err)
       })
 
-  }, [page])
+  }, [page, limit])
 
 
 
@@ -54,7 +54,7 @@ export default function ListItem() {
               allItems.map((ele, index) => {
                 return (
                   <tr key={ele._id}>
-                    <th>{index+1}</th>
+                    <th>{index + 1}</th>
                     <td>{ele.title}</td>
                     <td>{ele.description}</td>
                     <td>{ele.email}</td>
@@ -67,16 +67,28 @@ export default function ListItem() {
             }
           </tbody>
         </table>
+
+        {/* Pagination */}
         <div className="d-flex justify-content-end">
           <nav aria-label="Page navigation example">
             <ul className="pagination">
-              <li className="page-item" onClick={() => setPage(page - 1)}><a disabled={page == 0} className="page-link" href="#"><FontAwesomeIcon icon="fa-solid fa-chevron-left" /> Previous</a></li>
-              <li className="page-item" onClick={() => setPage(page + 1)}><a disabled={totalpage - (page * limit) < limit} className="page-link" href="#">Next <FontAwesomeIcon icon="fa-solid fa-chevron-right" /></a></li>
+              <li className="page-item" >
+                <select className="form-select" name="pageLimit" id="pageLimit" onChange={e => setLimit(e.target.value)}>
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                </select>
+              </li> &nbsp;
+              <li className="page-item" >
+                <button disabled={page == 0 ? true : false} onClick={() => setPage(page - 1)} className="btn btn-primary">
+                  <FontAwesomeIcon icon="fa-solid fa-chevron-left" /> Previous</button>
+              </li> &nbsp;
+              <li className="page-item" >
+                <button disabled={totalpage - (page * limit) < limit ? true : false} onClick={() => setPage(page + 1)} className="btn btn-primary"> Next
+                  <FontAwesomeIcon icon="fa-solid fa-chevron-right" /></button>
+              </li>
             </ul>
           </nav>
-
-
-
         </div>
       </div>
     </>
