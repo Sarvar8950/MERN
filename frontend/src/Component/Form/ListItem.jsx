@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function ListItem() {
   const [page, setPage] = useState(0);
@@ -8,7 +9,13 @@ export default function ListItem() {
   const [limit, setLimit] = useState(5);
   const [allItems, setAllItems] = useState([]);
 
+  const navigate = useNavigate();
+
   useEffect(() => {
+    getAllListItem()
+  }, [page, limit])
+
+  function getAllListItem() {
     let userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
     let payload = {
       email: userDetails.email,
@@ -25,19 +32,46 @@ export default function ListItem() {
       }
     }).then(res => res.json())
       .then(res => {
-        setTotalPage(res.data[0].totalRecords)
-        setAllItems(res.data)
+        if(res.data.length > 0) {
+          setTotalPage(res.data[0].totalRecords)
+          setAllItems(res.data)
+        } else {
+          setTotalPage(0)
+          setAllItems([])
+        }
       }).catch(err => {
         console.log(err)
       })
+  }
 
-  }, [page, limit])
+  function editItem(ele) {
+    // console.log(ele)
+    sessionStorage.setItem("editTodo", JSON.stringify(ele))
+    navigate("/additem")
+  }
 
+  function deleteItem(ele) {
+    let userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
+    // console.log(ele)
+    fetch(`http://localhost:8000/deleteitem/${ele._id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": userDetails.token
+      }
+    }).then(res => res)
+      .then(res => {
+        console.log(res)
+        getAllListItem()
+      }).catch(err => console.log(err))
+  }
 
 
   return (
     <>
       <h3 className="text-center m-4">List Of Todos</h3>
+      {
+        allItems.length > 0 ?
       <div className="container">
         <table className="table">
           <thead>
@@ -59,7 +93,8 @@ export default function ListItem() {
                     <td>{ele.description}</td>
                     <td>{ele.email}</td>
                     <td>
-                      <FontAwesomeIcon className="fa-solid" icon="fa-solid fa-pen-to-square" /> &nbsp; &nbsp; <FontAwesomeIcon className="fa-solid" icon="fa-solid fa-trash" />
+                      <FontAwesomeIcon className="fa-solid" icon="fa-solid fa-pen-to-square" onClick={() => editItem(ele)} /> &nbsp; &nbsp;
+                      <FontAwesomeIcon className="fa-solid" icon="fa-solid fa-trash" onClick={() => deleteItem(ele)} />
                     </td>
                   </tr>
                 )
@@ -90,7 +125,12 @@ export default function ListItem() {
             </ul>
           </nav>
         </div>
+      </div> 
+      :
+      <div className="container">
+        <h5 className="text-center">No Item Found <Link to="/additem">Create One</Link> </h5>
       </div>
+      }
     </>
   );
 }

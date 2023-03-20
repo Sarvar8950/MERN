@@ -16,7 +16,7 @@ function App() {
   const [isLogedin, setIsLogedIn] = useState(false)
   useEffect(() => {
     const logedInDetails = JSON.parse(sessionStorage.getItem('userDetails'))
-    console.log(logedInDetails)
+    // console.log(logedInDetails)
     setIsLogedIn(logedInDetails)
     
   }, [])

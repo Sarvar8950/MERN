@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import cors from 'cors';
 import connectToDB from "./mongodb.js"
 import {register, login, getSecurityQuestion, checkSecurityAnswer, changePassword, validateToken} from "./auth/auth.controller.js"
-import { addItem, getAllItem } from './addItem/controller.js';
+import { addItem, getAllItem, editItem, deleteItem } from './addItem/controller.js';
 import {verifytoken} from "./auth/jwtservices";
 
 
@@ -62,6 +62,8 @@ app.use((req, res, next) => {
 // Add Items To DB
 app.post("/additem", addItem)
 app.post("/getAllItem", getAllItem)
+app.put("/edititem", editItem)
+app.delete("/deleteitem/:_id", deleteItem)
 
 
 
