@@ -31,6 +31,9 @@ export default function Header({ setIsLogedIn }) {
                                 <li><Link className="dropdown-item" to="/listItem">List Todos</Link></li>
                             </ul>
                         </li>
+                        <li className="nav-item">
+                            <Link className="nav-link active" aria-current="page" to="/chat">Chat Page</Link>
+                        </li>
                     </ul>
                     {/* <form className="d-flex" role="search">
                         <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
