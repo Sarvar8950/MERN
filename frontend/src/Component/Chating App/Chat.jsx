@@ -1,15 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import Message from './Message'
+import io from "socket.io-client"
+
+const socket = io.connect("http://localhost:8000")
 
 export default function Chat() {
     const [messageform, setmessageform] = useState({
-        message : "",
-        time : ""
+        message: "",
+        time: ""
     })
 
     function sendMessage() {
-        console.log(messageform)
+        // console.log(messageform)
+        socket.emit('send_message', messageform)
     }
+    useEffect(() => {
+        socket.on("receive_message", (data) => {
+            console.log(data)
+        })
+    }, [socket])
 
     function addmessage(e) {
         let data = { ...messageform }
@@ -42,7 +51,7 @@ export default function Chat() {
                         </div>
                     </div>
                     <div className="col-9">
-                        <div className="card" style={{minHeight:"70vh",}}>
+                        <div className="card" style={{ minHeight: "70vh", }}>
                             <div className="card-body">
                                 <p className="card-text">With supporting text below as a natural lead-in to additional content.</p>
                             </div>
