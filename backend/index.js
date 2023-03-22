@@ -40,13 +40,16 @@ app.use(bodyParser.json({ extended: true }));
 io.on("connection", (socket) => {
   console.log("Socket Id", socket.id);
 
-  // socket.on("receive_message", (message) => {
-  //   console.log(message)
-  //   io.emit("message", message);
-  // });
-  socket.on("send_message", (message) => {
-    console.log(message)
-    socket.to(message).emit("receive_message", message);
+  socket.on("join_room", (data) => {
+    // console.log(data)
+    socket.join(data);
+  });
+  socket.on("send_message", (data) => {
+    console.log(data)
+
+    // use socket.broadcast.emit   ( To send all connected user  )
+    // socket.broadcast.emit("receive_message", data);
+    socket.to(data.room).emit("receive_message", data.message);
   });
 
   socket.on("disconnect", () => {

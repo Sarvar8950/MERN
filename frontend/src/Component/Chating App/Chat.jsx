@@ -5,6 +5,7 @@ import io from "socket.io-client"
 const socket = io.connect("http://localhost:8000")
 
 export default function Chat() {
+    const [room, setRoom] = useState('')
     const [messageform, setmessageform] = useState({
         message: "",
         time: ""
@@ -12,7 +13,11 @@ export default function Chat() {
 
     function sendMessage() {
         // console.log(messageform)
-        socket.emit('send_message', messageform)
+        socket.emit('send_message', { message:messageform, room:room})
+    }
+    function joinroom() {
+        // console.log(messageform)
+        socket.emit('join_room', room)
     }
     useEffect(() => {
         socket.on("receive_message", (data) => {
@@ -56,6 +61,10 @@ export default function Chat() {
                                 <p className="card-text">With supporting text below as a natural lead-in to additional content.</p>
                             </div>
                             <div className="card-footer">
+                                <div>
+                                    <input type="number" className="form-control mb-2" id="room" name="room" value={room} placeholder="Message" onChange={e => setRoom(e.target.value)} />
+                                    <button className="btn btn-primary me-md-2 float-end" type="button" onClick={joinroom}>Join Room</button>
+                                </div>
                                 <Message messageform={messageform} addmessage={addmessage} sendMessage={sendMessage} />
                             </div>
                         </div>
