@@ -50,7 +50,8 @@ export async function login(req, res) {
             message: "",
             data: null,
             request: "OK",
-            token: null
+            token: null,
+            _id : null
         })
         return;
     }
@@ -60,7 +61,8 @@ export async function login(req, res) {
             email : response.email,
             firstName : response.firstName,
             lastName : response.lastName,
-            securityQuestion : response.securityQuestion
+            securityQuestion : response.securityQuestion,
+            _id : response._id
         }
         const token = generateToken(payload);
         res.status(200).send({

@@ -5,28 +5,125 @@ import io from "socket.io-client"
 const socket = io.connect("http://localhost:8000")
 
 export default function Chat() {
+    const [senderChat, setSenderChat] = useState([])
+    const [receiverChat, setReceiverChat] = useState([])
+    const [userDetails, setUserdetails] = useState()
+    const [chat, setChat] = useState([])
+    const [receiver, setReceiver] = useState()
+    const [allUsers, setAllUsers] = useState([])
     const [room, setRoom] = useState('')
     const [messageform, setmessageform] = useState({
         message: "",
-        time: ""
+        time: new Date(),
+        sender: '',
+        receiver: ''
     })
 
-    function sendMessage() {
-        // console.log(messageform)
-        socket.emit('send_message', { message:messageform, room:room})
-    }
-    function joinroom() {
-        // console.log(messageform)
-        socket.emit('join_room', room)
-    }
+    let chatGroup = []
+
     useEffect(() => {
+        setUserdetails(JSON.parse(sessionStorage.getItem("userDetails")))
+        getAllusers()
+    }, [])
+
+    useEffect(() => {
+        // Receive messages from other user 
         socket.on("receive_message", (data) => {
-            console.log(data)
+            // console.log(data)
+            receiveMessage(null)
+            receiveMessageforReceiver(null)
         })
     }, [socket])
 
+    // send message to other user 
+    function sendMessage() {
+        const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
+        socket.emit('send_message', { message: messageform, room: room })
+        fetch(`http://localhost:8000/chat/sendMessage`, {
+            method: "POST",
+            body: JSON.stringify(messageform),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": userDetails.token
+            }
+        }).then(res => res.json())
+            .then(res => {
+                // console.log(res)
+                receiveMessage(null)
+                receiveMessageforReceiver(null)
+            }).catch(err => console.log(err))
+    }
+
+    function receiveMessage(reseiverid) {
+        const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
+        fetch(`http://localhost:8000/chat/receiveMessage/${userDetails._id}/${reseiverid ? reseiverid : receiver}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": userDetails.token
+            }
+        }).then(res => res.json())
+            .then(res => {
+                console.log("for sender", res.data)
+                setSenderChat(res.data)
+                chatGroup = res.data
+            }).catch(err => console.log(err))
+    }
+
+    function receiveMessageforReceiver(reseiverid) {
+        const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
+        fetch(`http://localhost:8000/chat/receiveMessage/${reseiverid ? reseiverid : receiver}/${userDetails._id}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": userDetails.token
+            }
+        }).then(res => res.json())
+            .then(res => {
+                console.log("for reeceiver", res.data)
+                let result = [...chatGroup, ...res.data]
+                for(let i = 0; i < result.length; i++) {
+                    for(let j = i+1; j < result.length; j++) {
+                        if(Date.parse(result[i].time) > Date.parse(result[j].time)) {
+                            [result[i], result[j]] = [result[j], result[i]]
+                        }
+                    }
+                }
+                setReceiverChat(res.data)
+                setChat(result)
+            }).catch(err => console.log(err))
+    }
+
+    // To join Room With other User 
+    function joinroom() {
+        socket.emit('join_room', room)
+    }
+
+    // Get List of all users 
+    function getAllusers() {
+        const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
+        fetch(`http://localhost:8000/chat/allusers/${userDetails.email}`, {
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": userDetails.token
+            }
+        })
+            .then(res => res.json())
+            .then(res => {
+                console.log(res)
+                if (res.responseStatus == "SUCCESS") {
+                    setAllUsers(res.data)
+                    setReceiver(res.data[0]._id)
+                    receiveMessage(res.data[0]._id)
+                    receiveMessageforReceiver(res.data[0]._id)
+                } else {
+                    setAllUsers([])
+                }
+            }).catch(err => console.log(err))
+    }
+
+    // add message 
     function addmessage(e) {
-        let data = { ...messageform }
+        const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
+        let data = { ...messageform, time: new Date(), sender: userDetails._id, receiver: receiver }
         data[e.target.name] = e.target.value
         setmessageform(data)
     }
@@ -43,14 +140,23 @@ export default function Chat() {
                             </div>
                             <div className="card-body">
                                 <div className="card">
-                                    <ul className="list-group list-group-flush">
-                                        <li className="list-group-item">An item</li>
-                                        <li className="list-group-item">A second item</li>
-                                        <li className="list-group-item">A third item</li>
-                                        <li className="list-group-item">A third item</li>
-                                        <li className="list-group-item">A third item</li>
-                                        <li className="list-group-item">A third item</li>
-                                    </ul>
+                                    <table className="table table-striped">
+                                        <tbody>
+                                            {
+                                                allUsers.map((item) => {
+                                                    return (
+                                                        <tr key={item._id} onClick={() => {
+                                                            setReceiver(item._id)
+                                                            receiveMessage(item._id)
+                                                            receiveMessageforReceiver(item._id)
+                                                        }}>
+                                                            <td><button className='btn'>{item.firstName} {item.lastName}</button></td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
@@ -58,7 +164,13 @@ export default function Chat() {
                     <div className="col-9">
                         <div className="card" style={{ minHeight: "70vh", }}>
                             <div className="card-body">
-                                <p className="card-text">With supporting text below as a natural lead-in to additional content.</p>
+                                {
+                                    chat.map((message) => {
+                                        return (
+                                            <p className="card-text" key={message._id}>{message.message}</p>
+                                        )
+                                    })
+                                }
                             </div>
                             <div className="card-footer">
                                 <div>

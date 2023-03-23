@@ -20,40 +20,43 @@ import {
 import { verifytoken } from "./auth/jwtservices";
 import { Server } from "socket.io";
 import { createServer } from "http";
+import { allUsers, receiveMessage, sendMessage } from "./chat/messages.js";
 
 dotenv.config();
 const app = express();
 
 const server = createServer(app);
 const io = new Server(server, {
-  cors : {
-    origin : "http://localhost:3000",
-    methods : ["GET", "POST", "PATCH", "PUT", "DELETE"]
-  }
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
+  },
 });
 
 app.use(cors());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ extended: true }));
 
-// Socket.IO
+// // Socket.IO
 io.on("connection", (socket) => {
-  console.log("Socket Id", socket.id);
-
+  // // to join room wiyh other user
   socket.on("join_room", (data) => {
-    // console.log(data)
     socket.join(data);
   });
-  socket.on("send_message", (data) => {
-    console.log(data)
 
-    // use socket.broadcast.emit   ( To send all connected user  )
-    // socket.broadcast.emit("receive_message", data);
+  // // use socket.broadcast.emit   ( To send all connected user  )
+  // socket.on("send_message", (data) => {
+  //   socket.broadcast.emit("receive_message", data);
+  // });
+
+  // // use socket.to(**room from received data**).emit   ( To send message to connected user in the room )
+  socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", data.message);
   });
 
+  // // when user disconnected
   socket.on("disconnect", () => {
-    console.log(`Socket ${socket.id} disconnected`);
+    // console.log(`Socket ${socket.id} disconnected`);
   });
 });
 
@@ -61,7 +64,7 @@ app.get("/", () => {
   console.log("get called");
 });
 
-// Auth
+// // Auth
 app.post("/register", register);
 app.post("/login", login);
 app.post("/getSecurityQuestion", getSecurityQuestion);
@@ -69,49 +72,48 @@ app.post("/checkSecurityAnswer", checkSecurityAnswer);
 app.patch("/changePassword", changePassword);
 app.post("/validateToken", validateToken);
 
-// app.use((req, res, next) => {
-//   // console.log(req.headers.authorization)
-//   let token = req.headers.authorization;
-//   try {
-//     let verifiedToken = verifytoken(token);
-//     // console.log(verifiedToken)
-//     if (verifiedToken) {
-//       next();
-//     } else {
-//       res.status(401).send({
-//         responseStatus: "FAILED",
-//         error: "Unauthorized User",
-//         data: null,
-//         request: "OK",
-//         message: "",
-//       });
-//     }
-//   } catch {
-//     // console.log("catch block")
-//     res.status(401).send({
-//       responseStatus: "FAILED",
-//       error: "Unauthorized User",
-//       data: null,
-//       request: "OK",
-//       message: "",
-//     });
-//   }
-//   // next()
-// });
+// Middleware to verify Users API request by velitate authorization token
+app.use((req, res, next) => {
+  let token = req.headers.authorization;
+  try {
+    let verifiedToken = verifytoken(token);
+    if (verifiedToken) {
+      next();
+    } else {
+      res.status(401).send({
+        responseStatus: "FAILED",
+        error: "Unauthorized User",
+        data: null,
+        request: "OK",
+        message: "",
+      });
+    }
+  } catch {
+    res.status(401).send({
+      responseStatus: "FAILED",
+      error: "Unauthorized User",
+      data: null,
+      request: "OK",
+      message: "",
+    });
+  }
+});
 
-// Add Items To DB
+// // Routes for TODO CRUD oprations
 app.post("/additem", addItem);
 app.post("/getAllItem", getAllItem);
 app.put("/edititem", editItem);
 app.delete("/deleteitem/:_id", deleteItem);
 
-
+// // Routes for Chating
+app.get("/chat/allusers/:email", allUsers)
+app.post("/chat/sendMessage", sendMessage)
+app.get("/chat/receiveMessage/:sender/:receiver", receiveMessage)
 
 
 connectToDB();
+
 const port = process.env.PORT;
 server.listen(port, () => {
   console.log("Backend is running on 8000", port);
 });
-
-
