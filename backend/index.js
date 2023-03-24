@@ -45,14 +45,14 @@ io.on("connection", (socket) => {
   });
 
   // // use socket.broadcast.emit   ( To send all connected user  )
-  // socket.on("send_message", (data) => {
-  //   socket.broadcast.emit("receive_message", data);
-  // });
+  socket.on("send_message", (data) => {
+    socket.broadcast.emit("receive_message", data);
+  });
 
   // // use socket.to(**room from received data**).emit   ( To send message to connected user in the room )
-  socket.on("send_message", (data) => {
-    socket.to(data.room).emit("receive_message", data.message);
-  });
+  // socket.on("send_message", (data) => {
+  //   socket.to(data.room).emit("receive_message", data.message);
+  // });
 
   // // when user disconnected
   socket.on("disconnect", () => {

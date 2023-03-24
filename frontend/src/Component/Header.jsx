@@ -1,9 +1,13 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 
 export default function Header({ setIsLogedIn }) {
-
+    const [userDetails, setUserDetails] = useState()
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setUserDetails(JSON.parse(sessionStorage.getItem("userDetails")))
+    }, [])
 
     function logout() {
         sessionStorage.clear()
@@ -35,10 +39,9 @@ export default function Header({ setIsLogedIn }) {
                             <Link className="nav-link active" aria-current="page" to="/chat">Chat Page</Link>
                         </li>
                     </ul>
-                    {/* <form className="d-flex" role="search">
-                        <input className="form-control me-2" type="search" placeholder="Search" aria-label="Search" />
-                            <button className="btn btn-outline-success" type="submit">Search</button>
-                    </form> */}
+                    <span className="navbar-text me-3">
+                        {userDetails?.firstName} {userDetails?.lastName}
+                    </span>
                     <button className='btn btn-dark' onClick={logout}>Logout</button>
                 </div>
             </div>

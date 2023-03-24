@@ -55,7 +55,11 @@ export async function sendMessage(req, res) {
 }
 
 export async function receiveMessage(req, res) {
-  const response = await chatDB.find({receiver:req.params.receiver});
+  // console.log(req.params.sender, req.params.receiver)
+  const response = await chatDB.find({
+    sender: req.params.sender,
+    receiver: { $in: [req.params.receiver] },
+  });
   if (response) {
     res.status(200).send({
       responseStatus: "SUCCESS",

@@ -5,13 +5,11 @@ import io from "socket.io-client"
 const socket = io.connect("http://localhost:8000")
 
 export default function Chat() {
-    const [senderChat, setSenderChat] = useState([])
-    const [receiverChat, setReceiverChat] = useState([])
     const [userDetails, setUserdetails] = useState()
     const [chat, setChat] = useState([])
     const [receiver, setReceiver] = useState()
     const [allUsers, setAllUsers] = useState([])
-    const [room, setRoom] = useState('')
+    const [room, setRoom] = useState('0')
     const [messageform, setmessageform] = useState({
         message: "",
         time: new Date(),
@@ -30,13 +28,19 @@ export default function Chat() {
         // Receive messages from other user 
         socket.on("receive_message", (data) => {
             // console.log(data)
-            receiveMessage(null)
-            receiveMessageforReceiver(null)
+            // setChat([...chat, data.message])
+            // setChat([])
+            chatGroup = []
+            receiveMessage(data.message.sender)
+            receiveMessageforReceiver(data.message.sender)
         })
     }, [socket])
 
     // send message to other user 
     function sendMessage() {
+        if (messageform.message.length < 2) {
+            return;
+        }
         const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
         socket.emit('send_message', { message: messageform, room: room })
         fetch(`http://localhost:8000/chat/sendMessage`, {
@@ -49,6 +53,12 @@ export default function Chat() {
         }).then(res => res.json())
             .then(res => {
                 // console.log(res)
+                setmessageform({
+                    message: "",
+                    time: new Date(),
+                    sender: '',
+                    receiver: ''
+                })
                 receiveMessage(null)
                 receiveMessageforReceiver(null)
             }).catch(err => console.log(err))
@@ -56,38 +66,38 @@ export default function Chat() {
 
     function receiveMessage(reseiverid) {
         const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
-        fetch(`http://localhost:8000/chat/receiveMessage/${userDetails._id}/${reseiverid ? reseiverid : receiver}`, {
+        fetch(`http://localhost:8000/chat/receiveMessage/${userDetails._id}/${reseiverid ? reseiverid : receiver._id}`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": userDetails.token
             }
         }).then(res => res.json())
             .then(res => {
-                console.log("for sender", res.data)
-                setSenderChat(res.data)
+                // console.log("for sender", res.data)
+                // setSenderChat(res.data)
                 chatGroup = res.data
             }).catch(err => console.log(err))
     }
 
     function receiveMessageforReceiver(reseiverid) {
         const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
-        fetch(`http://localhost:8000/chat/receiveMessage/${reseiverid ? reseiverid : receiver}/${userDetails._id}`, {
+        fetch(`http://localhost:8000/chat/receiveMessage/${reseiverid ? reseiverid : receiver._id}/${userDetails._id}`, {
             headers: {
                 "Content-Type": "application/json",
                 "Authorization": userDetails.token
             }
         }).then(res => res.json())
             .then(res => {
-                console.log("for reeceiver", res.data)
+                // console.log("for reeceiver", res.data)
                 let result = [...chatGroup, ...res.data]
-                for(let i = 0; i < result.length; i++) {
-                    for(let j = i+1; j < result.length; j++) {
-                        if(Date.parse(result[i].time) > Date.parse(result[j].time)) {
+                for (let i = 0; i < result.length; i++) {
+                    for (let j = i + 1; j < result.length; j++) {
+                        if (Date.parse(result[i].time) > Date.parse(result[j].time)) {
                             [result[i], result[j]] = [result[j], result[i]]
                         }
                     }
                 }
-                setReceiverChat(res.data)
+                // setReceiverChat(res.data)
                 setChat(result)
             }).catch(err => console.log(err))
     }
@@ -108,10 +118,10 @@ export default function Chat() {
         })
             .then(res => res.json())
             .then(res => {
-                console.log(res)
+                // console.log(res)
                 if (res.responseStatus == "SUCCESS") {
                     setAllUsers(res.data)
-                    setReceiver(res.data[0]._id)
+                    setReceiver(res.data[0])
                     receiveMessage(res.data[0]._id)
                     receiveMessageforReceiver(res.data[0]._id)
                 } else {
@@ -123,7 +133,7 @@ export default function Chat() {
     // add message 
     function addmessage(e) {
         const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
-        let data = { ...messageform, time: new Date(), sender: userDetails._id, receiver: receiver }
+        let data = { ...messageform, time: new Date(), sender: userDetails._id, receiver: receiver._id }
         data[e.target.name] = e.target.value
         setmessageform(data)
     }
@@ -138,15 +148,16 @@ export default function Chat() {
                             <div className="card-header">
                                 All Members
                             </div>
-                            <div className="card-body">
+                            <div className="card-body" style={{ minHeight: "70vh", overflowY: "scroll" }}>
                                 <div className="card">
                                     <table className="table table-striped">
                                         <tbody>
                                             {
-                                                allUsers.map((item) => {
+                                                allUsers.map((item, index) => {
                                                     return (
-                                                        <tr key={item._id} onClick={() => {
-                                                            setReceiver(item._id)
+                                                        <tr key={index} onClick={() => {
+                                                            // console.log(item._id, userDetails._id)
+                                                            setReceiver(item)
                                                             receiveMessage(item._id)
                                                             receiveMessageforReceiver(item._id)
                                                         }}>
@@ -162,21 +173,33 @@ export default function Chat() {
                         </div>
                     </div>
                     <div className="col-9">
-                        <div className="card" style={{ minHeight: "70vh", }}>
-                            <div className="card-body">
+                        <div className="card" >
+                        <div className="card-header">
+                                {receiver?.firstName} {receiver?.lastName}
+                            </div>
+                            <div className="card-body" style={{ height: "55vh", overflowY:"scroll"}}>
                                 {
-                                    chat.map((message) => {
+                                    chat.map((message, index) => {
                                         return (
-                                            <p className="card-text" key={message._id}>{message.message}</p>
+                                            <>
+                                                {
+                                                    userDetails._id === message.sender &&
+                                                    <p className="card-text p-3 mb-2 bg-primary text-white text-end" key={Math.random()+message.message}>{message.message}</p>
+                                                }
+                                                {
+                                                    userDetails._id !== message.sender &&
+                                                    <p className="card-text p-3 mb-2 bg-secondary text-white" key={Math.random()+message.message}>{message.message}</p>
+                                                }
+                                            </>
                                         )
                                     })
                                 }
                             </div>
                             <div className="card-footer">
-                                <div>
+                                {/* <div>
                                     <input type="number" className="form-control mb-2" id="room" name="room" value={room} placeholder="Message" onChange={e => setRoom(e.target.value)} />
                                     <button className="btn btn-primary me-md-2 float-end" type="button" onClick={joinroom}>Join Room</button>
-                                </div>
+                                </div> */}
                                 <Message messageform={messageform} addmessage={addmessage} sendMessage={sendMessage} />
                             </div>
                         </div>
