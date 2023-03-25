@@ -38,6 +38,9 @@ export default function Header({ setIsLogedIn }) {
                         <li className="nav-item">
                             <Link className="nav-link active" aria-current="page" to="/chat">Chat Page</Link>
                         </li>
+                        <li className="nav-item">
+                            <Link className="nav-link active" aria-current="page" to="/graph">Charts</Link>
+                        </li>
                     </ul>
                     <span className="navbar-text me-3">
                         {userDetails?.firstName} {userDetails?.lastName}

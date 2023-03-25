@@ -174,21 +174,19 @@ export default function Chat() {
                     </div>
                     <div className="col-9">
                         <div className="card" >
-                        <div className="card-header">
+                            <div className="card-header">
                                 {receiver?.firstName} {receiver?.lastName}
                             </div>
-                            <div className="card-body" style={{ height: "55vh", overflowY:"scroll"}}>
+                            <div className="card-body" style={{ height: "55vh", overflowY: "scroll" }}>
                                 {
                                     chat.map((message, index) => {
                                         return (
                                             <>
                                                 {
-                                                    userDetails._id === message.sender &&
-                                                    <p className="card-text p-3 mb-2 bg-primary text-white text-end" key={Math.random()+message.message}>{message.message}</p>
-                                                }
-                                                {
-                                                    userDetails._id !== message.sender &&
-                                                    <p className="card-text p-3 mb-2 bg-secondary text-white" key={Math.random()+message.message}>{message.message}</p>
+                                                    userDetails._id === message.sender ?
+                                                        <p className="card-text p-3 mb-2 bg-primary text-white text-end" key={Math.random() + message.message}>{message.message}</p>
+                                                        :
+                                                        <p className="card-text p-3 mb-2 bg-secondary text-white" key={Math.random() + message.message}>{message.message}</p>
                                                 }
                                             </>
                                         )

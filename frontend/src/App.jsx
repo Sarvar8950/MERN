@@ -12,6 +12,7 @@ import About from './Component/About';
 import Form from './Component/Form/Form';
 import ListItem from './Component/Form/ListItem';
 import Chat from './Component/Chating App/Chat';
+import Graph from './Component/graph/Graph';
 
 
 function App() {
@@ -44,6 +45,7 @@ function App() {
               <Route path="/addItem" element={<Form />} />
               <Route path="/listItem" element={<ListItem />} />
               <Route path="/chat" element={<Chat />} />
+              <Route path="/graph" element={<Graph />} />
             </Routes>
           </>
       }

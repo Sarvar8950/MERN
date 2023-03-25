@@ -2,3 +2,8 @@
     cursor: pointer;
     font-size: 22px;
 }
+
+canvas {
+    height: auto !important;
+    width: 35vw !important;
+}
