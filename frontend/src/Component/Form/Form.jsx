@@ -44,6 +44,7 @@ export default function Form() {
         }
         // console.log(payload)
         if (editMode) {
+            delete payload.totalRecords
             fetch('http://localhost:8000/edititem', {
                 method: "PUT",
                 body: JSON.stringify(payload),

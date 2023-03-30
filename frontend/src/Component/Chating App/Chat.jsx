@@ -16,6 +16,7 @@ export default function Chat() {
         sender: '',
         receiver: ''
     })
+    const [editMessageMode, setEditMessageMode] = useState(false)
 
     let chatGroup = []
 
@@ -27,9 +28,12 @@ export default function Chat() {
     useEffect(() => {
         // Receive messages from other user 
         socket.on("receive_message", (data) => {
+            chatGroup = []
+            receiveMessage(data.message.sender)
+            receiveMessageforReceiver(data.message.sender)
+        })
+        socket.on("reload_chat", (data) => {
             // console.log(data)
-            // setChat([...chat, data.message])
-            // setChat([])
             chatGroup = []
             receiveMessage(data.message.sender)
             receiveMessageforReceiver(data.message.sender)
@@ -52,7 +56,7 @@ export default function Chat() {
             }
         }).then(res => res.json())
             .then(res => {
-                // console.log(res)
+                console.log(res)
                 setmessageform({
                     message: "",
                     time: new Date(),
@@ -73,8 +77,7 @@ export default function Chat() {
             }
         }).then(res => res.json())
             .then(res => {
-                // console.log("for sender", res.data)
-                // setSenderChat(res.data)
+                console.log(res.data)
                 chatGroup = res.data
             }).catch(err => console.log(err))
     }
@@ -97,14 +100,9 @@ export default function Chat() {
                         }
                     }
                 }
-                // setReceiverChat(res.data)
+                console.log(res.data)
                 setChat(result)
             }).catch(err => console.log(err))
-    }
-
-    // To join Room With other User 
-    function joinroom() {
-        socket.emit('join_room', room)
     }
 
     // Get List of all users 
@@ -118,8 +116,8 @@ export default function Chat() {
         })
             .then(res => res.json())
             .then(res => {
-                // console.log(res)
                 if (res.responseStatus == "SUCCESS") {
+                    console.log(res)
                     setAllUsers(res.data)
                     setReceiver(res.data[0])
                     receiveMessage(res.data[0]._id)
@@ -136,6 +134,23 @@ export default function Chat() {
         let data = { ...messageform, time: new Date(), sender: userDetails._id, receiver: receiver._id }
         data[e.target.name] = e.target.value
         setmessageform(data)
+    }
+
+    // Delete Message 
+    function deleteMessage(data) {
+        const userDetails = JSON.parse(sessionStorage.getItem("userDetails"))
+        socket.emit('delete_message', { message: data, room: room })
+        fetch(`http://localhost:8000/chat/deleteMessage/${data._id}`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": userDetails.token
+            }
+        })
+            .then(() => {
+                receiveMessage(null)
+                receiveMessageforReceiver(null)
+            })
     }
 
     return (
