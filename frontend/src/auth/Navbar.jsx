@@ -6,8 +6,8 @@ export default function Navbar() {
         <nav className="navbar navbar-expand bg-body-tertiary bg-dark px-3" data-bs-theme="dark">
             <div className="container-fluid">
                 <Link className="navbar-brand text-light" to="/">Navbar</Link>
-                <Link className="navbar-link text-light" to="/">Login</Link>
-                <Link className="navbar-link text-light" to="/signup">Sign Up</Link>
+                <Link className="navbar-brand text-light" to="/">Login</Link>
+                <Link className="navbar-brand text-light" to="/signup">Sign Up</Link>
             </div>
         </nav>
 

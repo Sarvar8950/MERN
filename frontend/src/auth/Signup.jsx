@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 // import { Notify } from '../Notify.service'
 
 export default function Signup() {
@@ -13,6 +13,8 @@ export default function Signup() {
         email: '',
         confirmpassword: ''
     })
+
+    const navigate = useNavigate()
 
     function inputCredentials(e) {
         let data = { ...registerform }
@@ -54,11 +56,7 @@ export default function Signup() {
         })
             .then((res) => res.json())
             .then((res) => {
-                return (
-                    <></>
-                    // <Notify type='Success' msg={"User Registered Successfully"} bgcolor={"green"} />
-                )
-                console.log(res)
+                navigate("/")
             }).catch((err) => {
                 console.log(err)
             })
