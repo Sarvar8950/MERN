@@ -16,6 +16,7 @@ import {
   getAllItem,
   editItem,
   deleteItem,
+  downloadExcelFile
 } from "./addItem/controller.js";
 import { verifytoken } from "./auth/jwtservices";
 import { Server } from "socket.io";
@@ -104,6 +105,7 @@ app.post("/additem", addItem);
 app.post("/getAllItem", getAllItem);
 app.put("/edititem", editItem);
 app.delete("/deleteitem/:_id", deleteItem);
+app.post("/downloadExcelFile", downloadExcelFile);
 
 // // Routes for Chating
 app.get("/chat/allusers/:email", allUsers)
